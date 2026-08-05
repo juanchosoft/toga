@@ -13,19 +13,20 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLImageElement | null>(null);
+  const backgroundRef = useRef<HTMLImageElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const detectorRef = useRef<any>(null);
   const frameRef = useRef<number | null>(null);
   const lastBoxRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const facingRef = useRef<"user" | "environment">("user");
-  const scaleRef = useRef(3.65);
+  const scaleRef = useRef(4.25);
   const verticalRef = useRef(0);
 
   const [stage, setStage] = useState<Stage>("intro");
   const [message, setMessage] = useState("Preparando el filtro…");
   const [cameraReady, setCameraReady] = useState(false);
   const [automatic, setAutomatic] = useState(true);
-  const [scale, setScale] = useState(3.65);
+  const [scale, setScale] = useState(4.25);
   const [vertical, setVertical] = useState(0);
   const [photo, setPhoto] = useState("");
 
@@ -41,6 +42,9 @@ export default function Home() {
     const image = new Image();
     image.src = "/toga-uts.png";
     overlayRef.current = image;
+    const background = new Image();
+    background.src = "/graduation-bg.png";
+    backgroundRef.current = background;
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
       streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -72,7 +76,8 @@ export default function Home() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const overlay = overlayRef.current;
-    if (!video || !canvas || !overlay || video.readyState < 2) {
+    const background = backgroundRef.current;
+    if (!video || !canvas || !overlay || !background || video.readyState < 2 || !overlay.complete || !background.complete) {
       frameRef.current = requestAnimationFrame(drawFrame);
       return;
     }
@@ -86,13 +91,6 @@ export default function Home() {
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    ctx.save();
-    if (facingRef.current === "user") {
-      ctx.translate(width, 0);
-      ctx.scale(-1, 1);
-    }
-    ctx.drawImage(video, 0, 0, width, height);
 
     if (detectorRef.current) {
       try {
@@ -132,8 +130,28 @@ export default function Home() {
     const faceCenterY = face.y + face.height / 2;
     const overlayX = faceCenterX - overlayWidth / 2;
     const overlayY = faceCenterY - overlayHeight * 0.225 + verticalRef.current * height;
-    ctx.drawImage(overlay, overlayX, overlayY, overlayWidth, overlayHeight);
+
+    // Draw a fixed graduation background, never the room behind the person.
+    const bgRatio = Math.max(width / background.width, height / background.height);
+    const bgWidth = background.width * bgRatio;
+    const bgHeight = background.height * bgRatio;
+    ctx.drawImage(background, (width - bgWidth) / 2, (height - bgHeight) / 2, bgWidth, bgHeight);
+
+    // Keep only the face and a small amount of neck from the live camera.
+    // The body, clothing and original background are deliberately excluded.
+    const cutX = face.x - face.width * 0.24;
+    const cutY = face.y - face.height * 0.28;
+    const cutW = face.width * 1.48;
+    const cutH = face.height * 1.72;
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(faceCenterX, face.y + face.height * 0.66, cutW * 0.48, cutH * 0.49, 0, 0, Math.PI * 2);
+    ctx.clip();
+    // Intentionally unmirrored: logos and facial orientation remain correct in the saved photo.
+    ctx.drawImage(video, cutX, cutY, cutW, cutH, cutX, cutY, cutW, cutH);
     ctx.restore();
+
+    ctx.drawImage(overlay, overlayX, overlayY, overlayWidth, overlayHeight);
 
     frameRef.current = requestAnimationFrame(drawFrame);
   }, []);
@@ -253,7 +271,7 @@ export default function Home() {
             <p>{automatic ? "Filtro automático activo" : "Ajuste manual activo"}</p>
             <label>
               Tamaño
-              <input type="range" min="2.8" max="4.8" step="0.05" value={scale} onChange={(event) => setScale(Number(event.target.value))} />
+              <input type="range" min="3.6" max="5.6" step="0.05" value={scale} onChange={(event) => setScale(Number(event.target.value))} />
             </label>
             <label>
               Altura
