@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #17243a;
+  --ink-soft: #31445f;
+  --lime: #97e600;
+  --lime-dark: #6fb600;
+  --paper: #f4f7f2;
+  --white: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; min-height: 100%; }
+
+body {
+  background:
+    radial-gradient(circle at 15% 5%, rgba(151, 230, 0, .16), transparent 28rem),
+    linear-gradient(150deg, #eef4eb, #f9fbf8 56%, #e9eff4);
+  color: var(--ink);
+  font-family: var(--font-geist), Arial, sans-serif;
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.app-shell { min-height: 100svh; display: grid; grid-template-rows: auto 1fr auto; }
+
+.brand-bar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem clamp(1rem, 5vw, 3rem);
+  background: var(--ink);
+  color: var(--white);
+  border-bottom: 4px solid var(--lime);
+}
+
+.brand-bar strong, .brand-bar span { display: block; }
+.brand-bar strong { color: var(--lime); letter-spacing: .045em; font-size: .95rem; }
+.brand-bar span { opacity: .74; font-size: .78rem; margin-top: .1rem; }
+.brand-mark { display: grid; place-items: center; width: 2.5rem; aspect-ratio: 1; border: 2px solid var(--lime); border-radius: .7rem; color: var(--lime); font-weight: 850; }
+
+.camera-card {
+  width: min(100%, 31rem);
+  margin: clamp(1rem, 4vw, 2.5rem) auto;
+  align-self: center;
+  background: rgba(255, 255, 255, .93);
+  border: 1px solid rgba(23, 36, 58, .1);
+  border-radius: 1.6rem;
+  box-shadow: 0 1.5rem 4rem rgba(23, 36, 58, .14);
+  overflow: hidden;
+}
+
+.intro, .review, .result { padding: clamp(1.5rem, 7vw, 2.6rem); text-align: center; }
+.cap-icon { margin: 0 auto 1.2rem; display: grid; place-items: center; width: 4.3rem; aspect-ratio: 1; transform: rotate(45deg); border-radius: 1.1rem; background: var(--ink); color: var(--lime); font-size: 1.45rem; box-shadow: .55rem .55rem 0 var(--lime); }
+.cap-icon::first-letter { transform: rotate(-45deg); }
+.eyebrow { margin: 0 0 .55rem; color: var(--lime-dark); font-size: .76rem; font-weight: 850; letter-spacing: .12em; }
+h1 { margin: 0 0 .75rem; font-size: clamp(1.65rem, 6vw, 2.35rem); line-height: 1.06; letter-spacing: -.045em; }
+.intro > p:not(.eyebrow), .result p { color: #617087; line-height: 1.55; }
+
+.privacy-note { display: flex; gap: .65rem; align-items: flex-start; margin: 1.35rem 0; padding: .9rem; text-align: left; background: #edf6df; border-radius: .9rem; color: #536443; font-size: .82rem; }
+.privacy-note span { display: grid; place-items: center; flex: 0 0 1.35rem; aspect-ratio: 1; border-radius: 50%; background: var(--lime-dark); color: white; }
+.privacy-note p { margin: 0; line-height: 1.4; }
+
+.primary, .secondary { min-height: 3.25rem; border-radius: .85rem; padding: .75rem 1.2rem; font-weight: 800; border: 0; transition: transform .15s ease, filter .15s ease; }
+.primary { width: 100%; color: var(--ink); background: var(--lime); box-shadow: 0 .7rem 1.4rem rgba(111, 182, 0, .22); }
+.secondary { color: var(--ink); background: #e9edf1; }
+.primary:hover, .secondary:hover { filter: brightness(.96); transform: translateY(-1px); }
+
+.camera-stage { display: none; position: relative; min-height: 70svh; max-height: 48rem; background: #090d14; overflow: hidden; }
+.camera-stage.visible { display: block; }
+.camera-stage video { position: absolute; opacity: 0; pointer-events: none; }
+.camera-stage canvas { width: 100%; height: 100%; min-height: 70svh; max-height: 48rem; object-fit: cover; display: block; }
+.guide { position: absolute; top: 13%; left: 50%; transform: translateX(-50%); width: 43%; aspect-ratio: .78; border: 1px dashed rgba(255,255,255,.65); border-radius: 50%; pointer-events: none; }
+.flip { position: absolute; top: 1rem; right: 1rem; display: grid; place-items: center; width: 2.8rem; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.38); border-radius: 50%; color: white; background: rgba(12,19,31,.55); backdrop-filter: blur(8px); font-size: 1.3rem; }
+.camera-controls { position: absolute; left: .8rem; right: .8rem; bottom: .8rem; padding: .8rem 1rem 1rem; border: 1px solid rgba(255,255,255,.24); border-radius: 1.2rem; color: white; background: rgba(10,16,26,.72); backdrop-filter: blur(14px); }
+.camera-controls p { margin: 0 0 .5rem; text-align: center; color: var(--lime); font-size: .76rem; font-weight: 750; }
+.camera-controls label { display: grid; grid-template-columns: 3.5rem 1fr; align-items: center; gap: .5rem; margin: .2rem 0; font-size: .72rem; }
+.camera-controls input { accent-color: var(--lime); }
+.shutter { display: grid; place-items: center; width: 4rem; aspect-ratio: 1; margin: .65rem auto 0; border: 3px solid white; border-radius: 50%; background: transparent; }
+.shutter span { width: 3rem; aspect-ratio: 1; border-radius: 50%; background: var(--lime); }
+
+.review img { display: block; width: 100%; max-height: 55svh; object-fit: contain; margin: 1.2rem 0; border-radius: 1rem; background: #0a101a; }
+.review-actions { display: grid; grid-template-columns: 1fr 1.3fr; gap: .7rem; }
+.result { min-height: 26rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.loader, .success { display: grid; place-items: center; width: 4.2rem; aspect-ratio: 1; margin-bottom: 1.25rem; border-radius: 50%; }
+.loader { border: .35rem solid #dbe2e8; border-top-color: var(--lime-dark); animation: spin .8s linear infinite; }
+.success { color: white; background: var(--lime-dark); font-size: 2rem; font-weight: 900; }
+.status { margin: 0; padding: .7rem 1rem; color: #536075; background: white; border-top: 1px solid #e8edf0; text-align: center; font-size: .76rem; }
+footer { align-self: end; padding: 1rem; text-align: center; color: #68778a; font-size: .75rem; letter-spacing: .09em; text-transform: uppercase; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 34rem) {
+  .camera-card { margin: 0; width: 100%; border-radius: 0; box-shadow: none; border: 0; }
+  .camera-stage, .camera-stage canvas { min-height: calc(100svh - 5.3rem); max-height: none; }
+  footer { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; }
+}
