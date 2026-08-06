@@ -262,9 +262,10 @@ export default function Home() {
     outputContext.imageSmoothingQuality = "high";
     outputContext.setTransform(1, 0, 0, 1, 0, 0);
     outputContext.drawImage(canvas, 0, 0, output.width, output.height);
-    setPhoto(output.toDataURL("image/jpeg", 0.93));
-    setStage("review");
+    const capturedPhoto = output.toDataURL("image/jpeg", 0.93);
+    setPhoto(capturedPhoto);
     if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    await sendPhoto(capturedPhoto);
   };
 
   const retake = () => {
@@ -307,11 +308,12 @@ export default function Home() {
     window.close();
   }, []);
 
-  const sendPhoto = async () => {
+  const sendPhoto = async (photoData = photo) => {
     const params = new URLSearchParams(window.location.search);
     const callback = params.get("callback");
     const sessionId = params.get("session") ?? "sin-sesion";
     if (!callback || !/^https:\/\//i.test(callback)) {
+      setStage("review");
       setMessage("Este enlace no tiene una dirección válida para regresar la foto a n8n.");
       return;
     }
@@ -322,7 +324,7 @@ export default function Home() {
       const response = await fetch(callback, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "success", sessionId, imageBase64: photo }),
+        body: JSON.stringify({ status: "success", sessionId, imageBase64: photoData }),
       });
       if (!response.ok) throw new Error("No se pudo entregar la imagen");
       streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -352,10 +354,10 @@ export default function Home() {
             <div className="cap-icon" aria-hidden="true">◆</div>
             <p className="eyebrow">RECUERDO DE GRADUACIÓN</p>
             <h1>Tu foto con toga y birrete</h1>
-            <p>Activa la cámara, mira al frente y el filtro se ajustará automáticamente. Podrás repetir la foto antes de enviarla.</p>
+            <p>Activa la cámara, mira al frente y el filtro se ajustará automáticamente. Después de la cuenta regresiva, la foto se enviará sin pasos adicionales.</p>
             <div className="privacy-note">
               <span>✓</span>
-              <p>La cámara solo se activa con tu permiso. La foto se enviará al flujo de n8n cuando pulses <b>Usar esta foto</b>.</p>
+              <p>La cámara solo se activa con tu permiso. Al pulsar el obturador, la foto se enviará automáticamente al flujo de n8n.</p>
             </div>
             <button className="primary" onClick={startCamera}>Abrir cámara</button>
           </div>
@@ -382,13 +384,14 @@ export default function Home() {
 
         {stage === "review" && (
           <div className="review">
-            <p className="eyebrow">REVISA TU FOTO</p>
-            <h1>¿Te gusta cómo quedó?</h1>
+            <p className="eyebrow">NO SE PUDO ENVIAR</p>
+            <h1>Revisa la conexión</h1>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={photo} alt="Fotografía tomada con toga y birrete" />
+            <p>{message}</p>
             <div className="review-actions">
               <button className="secondary" onClick={retake}>Repetir</button>
-              <button className="primary" onClick={sendPhoto}>Usar esta foto</button>
+              <button className="primary" onClick={() => sendPhoto()}>Reintentar envío</button>
             </div>
           </div>
         )}
