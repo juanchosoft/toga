@@ -87,6 +87,7 @@ h1 { margin: 0 0 .75rem; font-size: clamp(1.65rem, 6vw, 2.35rem); line-height: 1
 .review img { display: block; width: 100%; max-height: calc(100dvh - 18rem); object-fit: contain; margin: .9rem 0; border-radius: .9rem; background: #0a101a; }
 .review-actions { display: grid; grid-template-columns: 1fr 1.3fr; gap: .7rem; }
 .result { min-height: 26rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.return-button { max-width: 18rem; margin-top: .8rem; }
 .loader, .success { display: grid; place-items: center; width: 4.2rem; aspect-ratio: 1; margin-bottom: 1.25rem; border-radius: 50%; }
 .loader { border: .35rem solid #dbe2e8; border-top-color: var(--lime-dark); animation: spin .8s linear infinite; }
 .success { color: white; background: var(--lime-dark); font-size: 2rem; font-weight: 900; }

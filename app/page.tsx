@@ -19,6 +19,7 @@ export default function Home() {
   const streamRef = useRef<MediaStream | null>(null);
   const detectorRef = useRef<any>(null);
   const frameRef = useRef<number | null>(null);
+  const returnTimerRef = useRef<number | null>(null);
   const lastBoxRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const facingRef = useRef<"user" | "environment">("user");
   const scaleRef = useRef(4.25);
@@ -52,6 +53,7 @@ export default function Home() {
     maskCanvasRef.current = document.createElement("canvas");
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      if (returnTimerRef.current) window.clearTimeout(returnTimerRef.current);
       streamRef.current?.getTracks().forEach((track) => track.stop());
       detectorRef.current?.close?.();
     };
@@ -271,6 +273,40 @@ export default function Home() {
     frameRef.current = requestAnimationFrame(drawFrame);
   };
 
+  const returnToChat = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedReturn = params.get("return");
+    const safeReturn = requestedReturn && /^https?:\/\//i.test(requestedReturn)
+      ? requestedReturn
+      : "";
+
+    // If the camera was opened in a new tab/window, reveal the chat and close it.
+    if (window.opener && !window.opener.closed) {
+      try {
+        window.opener.focus();
+      } catch {
+        // Some browsers isolate the opener; closing can still work.
+      }
+      window.close();
+      return;
+    }
+
+    // A return URL makes the fallback deterministic on browsers that block close().
+    if (safeReturn) {
+      window.location.replace(safeReturn);
+      return;
+    }
+
+    // If the camera replaced the chat in the same tab, return through its history.
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    // Last attempt for a standalone tab. Browsers may require the user to close it.
+    window.close();
+  }, []);
+
   const sendPhoto = async () => {
     const params = new URLSearchParams(window.location.search);
     const callback = params.get("callback");
@@ -291,7 +327,8 @@ export default function Home() {
       if (!response.ok) throw new Error("No se pudo entregar la imagen");
       streamRef.current?.getTracks().forEach((track) => track.stop());
       setStage("done");
-      setMessage("Fotografía enviada. Ya puedes volver al chat.");
+      setMessage("Fotografía enviada. Volviendo al chat automáticamente…");
+      returnTimerRef.current = window.setTimeout(returnToChat, 900);
     } catch {
       setStage("review");
       setMessage("No se pudo enviar la foto. Comprueba que el flujo de n8n siga esperando e inténtalo otra vez.");
@@ -361,6 +398,9 @@ export default function Home() {
             <div className={stage === "done" ? "success" : "loader"}>{stage === "done" ? "✓" : ""}</div>
             <h1>{stage === "done" ? "¡Todo listo!" : "Un momento…"}</h1>
             <p>{message}</p>
+            {stage === "done" && (
+              <button className="primary return-button" onClick={returnToChat}>Volver al chat ahora</button>
+            )}
           </div>
         )}
 
