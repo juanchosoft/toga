@@ -124,12 +124,17 @@ export default function Home() {
       }
     }
 
-    const face = lastBoxRef.current ?? {
+    const rawFace = lastBoxRef.current ?? {
       x: width * 0.38,
       y: height * 0.2,
       width: width * 0.24,
       height: height * 0.24,
     };
+    // A front camera should behave like a natural mirror while composing the selfie.
+    // Only the live person is reflected; the toga and institutional marks stay readable.
+    const face = facingRef.current === "user"
+      ? { ...rawFace, x: width - rawFace.x - rawFace.width }
+      : rawFace;
     const overlayWidth = face.width * scaleRef.current;
     const overlayHeight = overlayWidth * 1.5;
     const faceCenterX = face.x + face.width / 2;
@@ -159,11 +164,11 @@ export default function Home() {
       if (subjectCtx && maskCtx) {
         const top = face.y - face.height * 0.38;
         const jaw = face.y + face.height * 1.08;
-        const neckBottom = face.y + face.height * 1.92;
+        const neckBottom = face.y + face.height * 2.18;
         const left = face.x - face.width * 0.25;
         const right = face.x + face.width * 1.25;
-        const neckLeft = faceCenterX - face.width * 0.27;
-        const neckRight = faceCenterX + face.width * 0.27;
+        const neckLeft = faceCenterX - face.width * 0.36;
+        const neckRight = faceCenterX + face.width * 0.36;
 
         maskCtx.clearRect(0, 0, width, height);
         maskCtx.save();
@@ -181,8 +186,13 @@ export default function Home() {
         maskCtx.restore();
 
         subjectCtx.clearRect(0, 0, width, height);
-        // Intentionally unmirrored: the face and institutional marks remain correctly oriented.
+        subjectCtx.save();
+        if (facingRef.current === "user") {
+          subjectCtx.translate(width, 0);
+          subjectCtx.scale(-1, 1);
+        }
         subjectCtx.drawImage(video, 0, 0, width, height);
+        subjectCtx.restore();
         subjectCtx.globalCompositeOperation = "destination-in";
         subjectCtx.drawImage(maskCanvas, 0, 0);
         subjectCtx.globalCompositeOperation = "source-over";
@@ -320,7 +330,7 @@ export default function Home() {
           {countdown > 0 && <div className="countdown" aria-live="assertive">{countdown}</div>}
           <button className="flip" onClick={flipCamera} aria-label="Cambiar cámara">↻</button>
           <div className="camera-controls">
-            <p>{automatic ? "Tracker facial activo · Vista sin espejo" : "Ajuste manual · Vista sin espejo"}</p>
+            <p>{automatic ? "Tracker activo · Movimiento natural" : "Ajuste manual · Movimiento natural"}</p>
             <label>
               Tamaño
               <input type="range" min="3.6" max="5.6" step="0.05" value={scale} onChange={(event) => setScale(Number(event.target.value))} />
