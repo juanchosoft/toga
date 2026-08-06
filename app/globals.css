@@ -71,7 +71,7 @@ h1 { margin: 0 0 .75rem; font-size: clamp(1.65rem, 6vw, 2.35rem); line-height: 1
 .camera-stage { display: none; position: relative; min-height: 70svh; max-height: 48rem; background: #090d14; overflow: hidden; }
 .camera-stage.visible { display: block; }
 .camera-stage video { position: absolute; opacity: 0; pointer-events: none; }
-.camera-stage canvas { width: 100%; height: 100%; min-height: 70svh; max-height: 48rem; object-fit: cover; display: block; }
+.camera-stage canvas { width: 100%; height: 100%; min-height: 70svh; max-height: 48rem; object-fit: cover; display: block; transform: none !important; }
 .flip { position: absolute; top: 1rem; right: 1rem; display: grid; place-items: center; width: 2.8rem; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.38); border-radius: 50%; color: white; background: rgba(12,19,31,.55); backdrop-filter: blur(8px); font-size: 1.3rem; }
 .camera-controls { position: absolute; left: .8rem; right: .8rem; bottom: .8rem; padding: .8rem 1rem 1rem; border: 1px solid rgba(255,255,255,.24); border-radius: 1.2rem; color: white; background: rgba(10,16,26,.72); backdrop-filter: blur(14px); }
 .camera-controls p { margin: 0 0 .5rem; text-align: center; color: var(--lime); font-size: .76rem; font-weight: 750; }

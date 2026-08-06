@@ -95,6 +95,7 @@ export default function Home() {
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     if (detectorRef.current) {
       try {
@@ -110,10 +111,10 @@ export default function Home() {
           };
           lastBoxRef.current = previous
             ? {
-                x: previous.x * 0.72 + next.x * 0.28,
-                y: previous.y * 0.72 + next.y * 0.28,
-                width: previous.width * 0.72 + next.width * 0.28,
-                height: previous.height * 0.72 + next.height * 0.28,
+                x: previous.x * 0.8 + next.x * 0.2,
+                y: previous.y * 0.8 + next.y * 0.2,
+                width: previous.width * 0.8 + next.width * 0.2,
+                height: previous.height * 0.8 + next.height * 0.2,
               }
             : next;
         }
@@ -155,24 +156,22 @@ export default function Home() {
       const subjectCtx = subjectCanvas.getContext("2d");
       const maskCtx = maskCanvas.getContext("2d");
       if (subjectCtx && maskCtx) {
-        const top = face.y - face.height * 0.42;
-        const jaw = face.y + face.height * 1.12;
-        const neckBottom = face.y + face.height * 2.05;
-        const left = face.x - face.width * 0.34;
-        const right = face.x + face.width * 1.34;
-        const neckLeft = faceCenterX - face.width * 0.34;
-        const neckRight = faceCenterX + face.width * 0.34;
+        const top = face.y - face.height * 0.38;
+        const jaw = face.y + face.height * 1.08;
+        const neckBottom = face.y + face.height * 1.92;
+        const left = face.x - face.width * 0.25;
+        const right = face.x + face.width * 1.25;
+        const neckLeft = faceCenterX - face.width * 0.27;
+        const neckRight = faceCenterX + face.width * 0.27;
 
         maskCtx.clearRect(0, 0, width, height);
         maskCtx.save();
-        maskCtx.filter = `blur(${Math.max(8, face.width * 0.1)}px)`;
+        maskCtx.filter = `blur(${Math.max(5, face.width * 0.055)}px)`;
         maskCtx.fillStyle = "white";
         maskCtx.beginPath();
         maskCtx.moveTo(faceCenterX, top);
         maskCtx.bezierCurveTo(left, top, left, face.y + face.height * 0.7, faceCenterX - face.width * 0.48, jaw);
         maskCtx.lineTo(neckLeft, neckBottom);
-        maskCtx.lineTo(faceCenterX - face.width * 0.92, neckBottom + face.height * 0.35);
-        maskCtx.lineTo(faceCenterX + face.width * 0.92, neckBottom + face.height * 0.35);
         maskCtx.lineTo(neckRight, neckBottom);
         maskCtx.lineTo(faceCenterX + face.width * 0.48, jaw);
         maskCtx.bezierCurveTo(right, face.y + face.height * 0.7, right, top, faceCenterX, top);
@@ -307,7 +306,7 @@ export default function Home() {
           <canvas ref={canvasRef} aria-label="Vista previa de cámara con toga y birrete" />
           <button className="flip" onClick={flipCamera} aria-label="Cambiar cámara">↻</button>
           <div className="camera-controls">
-            <p>{automatic ? "Filtro automático activo" : "Ajuste manual activo"}</p>
+            <p>{automatic ? "Tracker facial activo · Vista sin espejo" : "Ajuste manual · Vista sin espejo"}</p>
             <label>
               Tamaño
               <input type="range" min="3.6" max="5.6" step="0.05" value={scale} onChange={(event) => setScale(Number(event.target.value))} />
