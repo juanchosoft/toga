@@ -241,6 +241,39 @@ export default function Home() {
     await startCamera();
   };
 
+  const downloadCapturedPhoto = (dataUrl: string) => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = (params.get("session") ?? "graduacion")
+      .replace(/[^a-zA-Z0-9_-]/g, "-");
+    const fileName = `foto-toga-uts-${sessionId}.jpg`;
+
+    try {
+      const [metadata, content] = dataUrl.split(",", 2);
+      if (!content) throw new Error("Imagen sin contenido");
+      const mimeType = metadata.match(/^data:([^;]+);base64$/)?.[1] ?? "image/jpeg";
+      const decoded = window.atob(content);
+      const bytes = new Uint8Array(decoded.length);
+      for (let index = 0; index < decoded.length; index += 1) {
+        bytes[index] = decoded.charCodeAt(index);
+      }
+      const objectUrl = URL.createObjectURL(new Blob([bytes], { type: mimeType }));
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+    } catch {
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+  };
+
   const takePhoto = async () => {
     if (!cameraReady || countdown > 0) return;
     for (const value of [3, 2, 1]) {
@@ -265,6 +298,7 @@ export default function Home() {
     const capturedPhoto = output.toDataURL("image/jpeg", 0.93);
     setPhoto(capturedPhoto);
     if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    downloadCapturedPhoto(capturedPhoto);
     await sendPhoto(capturedPhoto);
   };
 
@@ -312,6 +346,7 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search);
     const callback = params.get("callback");
     const sessionId = params.get("session") ?? "sin-sesion";
+    const fileName = `foto-toga-uts-${sessionId.replace(/[^a-zA-Z0-9_-]/g, "-")}.jpg`;
     if (!callback || !/^https:\/\//i.test(callback)) {
       setStage("review");
       setMessage("Este enlace no tiene una dirección válida para regresar la foto a n8n.");
@@ -324,7 +359,7 @@ export default function Home() {
       const response = await fetch(callback, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "success", sessionId, imageBase64: photoData }),
+        body: JSON.stringify({ status: "success", sessionId, fileName, imageBase64: photoData }),
       });
       if (!response.ok) throw new Error("No se pudo entregar la imagen");
       streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -354,10 +389,10 @@ export default function Home() {
             <div className="cap-icon" aria-hidden="true">◆</div>
             <p className="eyebrow">RECUERDO DE GRADUACIÓN</p>
             <h1>Tu foto con toga y birrete</h1>
-            <p>Activa la cámara, mira al frente y el filtro se ajustará automáticamente. Después de la cuenta regresiva, la foto se enviará sin pasos adicionales.</p>
+            <p>Activa la cámara, mira al frente y el filtro se ajustará automáticamente. Después de la cuenta regresiva, la foto se descargará y se enviará sin pasos adicionales.</p>
             <div className="privacy-note">
               <span>✓</span>
-              <p>La cámara solo se activa con tu permiso. Al pulsar el obturador, la foto se enviará automáticamente al flujo de n8n.</p>
+              <p>La cámara solo se activa con tu permiso. Al pulsar el obturador, recibirás tu foto y también se enviará automáticamente al flujo de n8n.</p>
             </div>
             <button className="primary" onClick={startCamera}>Abrir cámara</button>
           </div>

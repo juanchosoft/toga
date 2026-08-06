@@ -34,4 +34,4 @@ La aplicación enviará al `callback` un POST JSON con:
 
 La cámara requiere HTTPS y permiso explícito del usuario. MediaPipe se carga en el navegador para ajustar el filtro; si no está disponible, la interfaz permite ajustarlo manualmente.
 
-Al pulsar el obturador, la aplicación realiza la cuenta regresiva, envía la fotografía al callback de n8n y vuelve al chat automáticamente. No requiere una confirmación adicional del usuario.
+Al pulsar el obturador, la aplicación realiza la cuenta regresiva, descarga la fotografía compuesta con toga, birrete y estola, la envía al callback de n8n y vuelve al chat automáticamente. No requiere una confirmación adicional del usuario.
