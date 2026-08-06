@@ -1,4 +1,4 @@
-# Foto con toga — SPIDERSOFTWARE
+# Foto con toga — Universitaria Tecnológica de Santander
 
 Aplicación móvil para tomar una fotografía con filtro de toga y birrete y enviarla al nodo `Wait` de n8n.
 

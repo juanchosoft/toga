@@ -3,8 +3,8 @@
 :root {
   --ink: #17243a;
   --ink-soft: #31445f;
-  --lime: #97e600;
-  --lime-dark: #6fb600;
+  --lime: #C3D730;
+  --lime-dark: #93a51a;
   --paper: #f4f7f2;
   --white: #ffffff;
 }
@@ -15,7 +15,7 @@ html, body { margin: 0; min-height: 100%; }
 
 body {
   background:
-    radial-gradient(circle at 15% 5%, rgba(151, 230, 0, .16), transparent 28rem),
+    radial-gradient(circle at 15% 5%, rgba(195, 215, 48, .18), transparent 28rem),
     linear-gradient(150deg, #eef4eb, #f9fbf8 56%, #e9eff4);
   color: var(--ink);
   font-family: var(--font-geist), Arial, sans-serif;
@@ -39,7 +39,7 @@ button { cursor: pointer; }
 .brand-bar strong, .brand-bar span { display: block; }
 .brand-bar strong { color: var(--lime); letter-spacing: .045em; font-size: .95rem; }
 .brand-bar span { opacity: .74; font-size: .78rem; margin-top: .1rem; }
-.brand-mark { display: grid; place-items: center; width: 2.5rem; aspect-ratio: 1; border: 2px solid var(--lime); border-radius: .7rem; color: var(--lime); font-weight: 850; }
+.brand-logo { display: block; width: 4.25rem; height: 2.7rem; object-fit: contain; flex: 0 0 auto; }
 
 .camera-card {
   width: min(100%, 31rem);
@@ -64,7 +64,7 @@ h1 { margin: 0 0 .75rem; font-size: clamp(1.65rem, 6vw, 2.35rem); line-height: 1
 .privacy-note p { margin: 0; line-height: 1.4; }
 
 .primary, .secondary { min-height: 3.25rem; border-radius: .85rem; padding: .75rem 1.2rem; font-weight: 800; border: 0; transition: transform .15s ease, filter .15s ease; }
-.primary { width: 100%; color: var(--ink); background: var(--lime); box-shadow: 0 .7rem 1.4rem rgba(111, 182, 0, .22); }
+.primary { width: 100%; color: var(--ink); background: var(--lime); box-shadow: 0 .7rem 1.4rem rgba(147, 165, 26, .24); }
 .secondary { color: var(--ink); background: #e9edf1; }
 .primary:hover, .secondary:hover { filter: brightness(.96); transform: translateY(-1px); }
 
@@ -72,7 +72,6 @@ h1 { margin: 0 0 .75rem; font-size: clamp(1.65rem, 6vw, 2.35rem); line-height: 1
 .camera-stage.visible { display: block; }
 .camera-stage video { position: absolute; opacity: 0; pointer-events: none; }
 .camera-stage canvas { width: 100%; height: 100%; min-height: 70svh; max-height: 48rem; object-fit: cover; display: block; }
-.guide { position: absolute; top: 13%; left: 50%; transform: translateX(-50%); width: 43%; aspect-ratio: .78; border: 1px dashed rgba(255,255,255,.65); border-radius: 50%; pointer-events: none; }
 .flip { position: absolute; top: 1rem; right: 1rem; display: grid; place-items: center; width: 2.8rem; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.38); border-radius: 50%; color: white; background: rgba(12,19,31,.55); backdrop-filter: blur(8px); font-size: 1.3rem; }
 .camera-controls { position: absolute; left: .8rem; right: .8rem; bottom: .8rem; padding: .8rem 1rem 1rem; border: 1px solid rgba(255,255,255,.24); border-radius: 1.2rem; color: white; background: rgba(10,16,26,.72); backdrop-filter: blur(14px); }
 .camera-controls p { margin: 0 0 .5rem; text-align: center; color: var(--lime); font-size: .76rem; font-weight: 750; }

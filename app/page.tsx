@@ -14,6 +14,8 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLImageElement | null>(null);
   const backgroundRef = useRef<HTMLImageElement | null>(null);
+  const subjectCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const maskCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const detectorRef = useRef<any>(null);
   const frameRef = useRef<number | null>(null);
@@ -45,6 +47,8 @@ export default function Home() {
     const background = new Image();
     background.src = "/graduation-bg.png";
     backgroundRef.current = background;
+    subjectCanvasRef.current = document.createElement("canvas");
+    maskCanvasRef.current = document.createElement("canvas");
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
       streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -137,19 +141,54 @@ export default function Home() {
     const bgHeight = background.height * bgRatio;
     ctx.drawImage(background, (width - bgWidth) / 2, (height - bgHeight) / 2, bgWidth, bgHeight);
 
-    // Keep only the face and a small amount of neck from the live camera.
-    // The body, clothing and original background are deliberately excluded.
-    const cutX = face.x - face.width * 0.24;
-    const cutY = face.y - face.height * 0.28;
-    const cutW = face.width * 1.48;
-    const cutH = face.height * 1.72;
-    ctx.save();
-    ctx.beginPath();
-    ctx.ellipse(faceCenterX, face.y + face.height * 0.66, cutW * 0.48, cutH * 0.49, 0, 0, Math.PI * 2);
-    ctx.clip();
-    // Intentionally unmirrored: logos and facial orientation remain correct in the saved photo.
-    ctx.drawImage(video, cutX, cutY, cutW, cutH, cutX, cutY, cutW, cutH);
-    ctx.restore();
+    // Preserve the sharp head and complete neck with a soft anatomical mask.
+    // Its blurred edge blends naturally into the ceremony background, without an oval border.
+    const subjectCanvas = subjectCanvasRef.current;
+    const maskCanvas = maskCanvasRef.current;
+    if (subjectCanvas && maskCanvas) {
+      if (subjectCanvas.width !== width || subjectCanvas.height !== height) {
+        subjectCanvas.width = width;
+        subjectCanvas.height = height;
+        maskCanvas.width = width;
+        maskCanvas.height = height;
+      }
+      const subjectCtx = subjectCanvas.getContext("2d");
+      const maskCtx = maskCanvas.getContext("2d");
+      if (subjectCtx && maskCtx) {
+        const top = face.y - face.height * 0.42;
+        const jaw = face.y + face.height * 1.12;
+        const neckBottom = face.y + face.height * 2.05;
+        const left = face.x - face.width * 0.34;
+        const right = face.x + face.width * 1.34;
+        const neckLeft = faceCenterX - face.width * 0.34;
+        const neckRight = faceCenterX + face.width * 0.34;
+
+        maskCtx.clearRect(0, 0, width, height);
+        maskCtx.save();
+        maskCtx.filter = `blur(${Math.max(8, face.width * 0.1)}px)`;
+        maskCtx.fillStyle = "white";
+        maskCtx.beginPath();
+        maskCtx.moveTo(faceCenterX, top);
+        maskCtx.bezierCurveTo(left, top, left, face.y + face.height * 0.7, faceCenterX - face.width * 0.48, jaw);
+        maskCtx.lineTo(neckLeft, neckBottom);
+        maskCtx.lineTo(faceCenterX - face.width * 0.92, neckBottom + face.height * 0.35);
+        maskCtx.lineTo(faceCenterX + face.width * 0.92, neckBottom + face.height * 0.35);
+        maskCtx.lineTo(neckRight, neckBottom);
+        maskCtx.lineTo(faceCenterX + face.width * 0.48, jaw);
+        maskCtx.bezierCurveTo(right, face.y + face.height * 0.7, right, top, faceCenterX, top);
+        maskCtx.closePath();
+        maskCtx.fill();
+        maskCtx.restore();
+
+        subjectCtx.clearRect(0, 0, width, height);
+        // Intentionally unmirrored: the face and institutional marks remain correctly oriented.
+        subjectCtx.drawImage(video, 0, 0, width, height);
+        subjectCtx.globalCompositeOperation = "destination-in";
+        subjectCtx.drawImage(maskCanvas, 0, 0);
+        subjectCtx.globalCompositeOperation = "source-over";
+        ctx.drawImage(subjectCanvas, 0, 0);
+      }
+    }
 
     ctx.drawImage(overlay, overlayX, overlayY, overlayWidth, overlayHeight);
 
@@ -240,9 +279,10 @@ export default function Home() {
   return (
     <main className="app-shell">
       <header className="brand-bar">
-        <div className="brand-mark">S</div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="brand-logo" src="/logo-uts-lime.png" alt="Logo UTS" />
         <div>
-          <strong>SPIDERSOFTWARE</strong>
+          <strong>UNIVERSITARIA TECNOLÓGICA DE SANTANDER</strong>
           <span>Foto de graduación</span>
         </div>
       </header>
@@ -265,7 +305,6 @@ export default function Home() {
         <div className={`camera-stage ${stage === "camera" ? "visible" : ""}`}>
           <video ref={videoRef} playsInline muted aria-hidden="true" />
           <canvas ref={canvasRef} aria-label="Vista previa de cámara con toga y birrete" />
-          <div className="guide" aria-hidden="true" />
           <button className="flip" onClick={flipCamera} aria-label="Cambiar cámara">↻</button>
           <div className="camera-controls">
             <p>{automatic ? "Filtro automático activo" : "Ajuste manual activo"}</p>
@@ -305,7 +344,7 @@ export default function Home() {
         {stage !== "intro" && stage !== "done" && <p className="status" role="status">{message}</p>}
       </section>
 
-      <footer>Software · Datos · IA · Apps</footer>
+      <footer>Universitaria Tecnológica de Santander · UTS</footer>
     </main>
   );
 }
