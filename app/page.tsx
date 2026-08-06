@@ -31,6 +31,7 @@ export default function Home() {
   const [scale, setScale] = useState(4.25);
   const [vertical, setVertical] = useState(0);
   const [photo, setPhoto] = useState("");
+  const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
     scaleRef.current = scale;
@@ -201,8 +202,8 @@ export default function Home() {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingRef.current,
-          width: { ideal: 1080 },
-          height: { ideal: 1440 },
+          width: { ideal: 1440 },
+          height: { ideal: 1920 },
         },
         audio: false,
       });
@@ -228,16 +229,28 @@ export default function Home() {
     await startCamera();
   };
 
-  const takePhoto = () => {
+  const takePhoto = async () => {
+    if (!cameraReady || countdown > 0) return;
+    for (const value of [3, 2, 1]) {
+      setCountdown(value);
+      await new Promise((resolve) => window.setTimeout(resolve, 700));
+    }
+    setCountdown(0);
+    await new Promise((resolve) => window.setTimeout(resolve, 180));
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const maxWidth = 1080;
+    const maxWidth = 1440;
     const ratio = Math.min(1, maxWidth / canvas.width);
     const output = document.createElement("canvas");
     output.width = Math.round(canvas.width * ratio);
     output.height = Math.round(canvas.height * ratio);
-    output.getContext("2d")?.drawImage(canvas, 0, 0, output.width, output.height);
-    setPhoto(output.toDataURL("image/jpeg", 0.86));
+    const outputContext = output.getContext("2d");
+    if (!outputContext) return;
+    outputContext.imageSmoothingEnabled = true;
+    outputContext.imageSmoothingQuality = "high";
+    outputContext.setTransform(1, 0, 0, 1, 0, 0);
+    outputContext.drawImage(canvas, 0, 0, output.width, output.height);
+    setPhoto(output.toDataURL("image/jpeg", 0.93));
     setStage("review");
     if (frameRef.current) cancelAnimationFrame(frameRef.current);
   };
@@ -304,6 +317,7 @@ export default function Home() {
         <div className={`camera-stage ${stage === "camera" ? "visible" : ""}`}>
           <video ref={videoRef} playsInline muted aria-hidden="true" />
           <canvas ref={canvasRef} aria-label="Vista previa de cámara con toga y birrete" />
+          {countdown > 0 && <div className="countdown" aria-live="assertive">{countdown}</div>}
           <button className="flip" onClick={flipCamera} aria-label="Cambiar cámara">↻</button>
           <div className="camera-controls">
             <p>{automatic ? "Tracker facial activo · Vista sin espejo" : "Ajuste manual · Vista sin espejo"}</p>
@@ -315,7 +329,7 @@ export default function Home() {
               Altura
               <input type="range" min="-0.18" max="0.18" step="0.01" value={vertical} onChange={(event) => setVertical(Number(event.target.value))} />
             </label>
-            <button className="shutter" onClick={takePhoto} disabled={!cameraReady} aria-label="Tomar foto"><span /></button>
+            <button className="shutter" onClick={takePhoto} disabled={!cameraReady || countdown > 0} aria-label="Tomar foto"><span /></button>
           </div>
         </div>
 

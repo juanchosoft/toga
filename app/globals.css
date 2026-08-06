@@ -81,6 +81,8 @@ h1 { margin: 0 0 .75rem; font-size: clamp(1.65rem, 6vw, 2.35rem); line-height: 1
 .camera-controls input { width: 100%; min-height: 1.5rem; accent-color: var(--lime); }
 .shutter { display: grid; place-items: center; width: 4rem; aspect-ratio: 1; margin: .65rem auto 0; border: 3px solid white; border-radius: 50%; background: transparent; }
 .shutter span { width: 3rem; aspect-ratio: 1; border-radius: 50%; background: var(--lime); }
+.shutter:disabled { opacity: .62; cursor: wait; }
+.countdown { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; color: white; background: rgba(7, 12, 20, .12); text-shadow: 0 .2rem 1rem rgba(0,0,0,.7); font-size: clamp(5rem, 30vw, 9rem); font-weight: 900; line-height: 1; pointer-events: none; }
 
 .review img { display: block; width: 100%; max-height: calc(100dvh - 18rem); object-fit: contain; margin: .9rem 0; border-radius: .9rem; background: #0a101a; }
 .review-actions { display: grid; grid-template-columns: 1fr 1.3fr; gap: .7rem; }
