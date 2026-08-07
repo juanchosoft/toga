@@ -164,7 +164,9 @@ export default function Home() {
       const subjectCtx = subjectCanvas.getContext("2d");
       const maskCtx = maskCanvas.getContext("2d");
       if (subjectCtx && maskCtx) {
-        const top = face.y - face.height * 0.38;
+        // Keep the feathered top edge fully behind the mortarboard so the
+        // forehead and hairline remain opaque and sharp beneath its brim.
+        const top = face.y - face.height * 0.75;
         const jaw = face.y + face.height * 1.08;
         const neckBottom = face.y + face.height * 2.18;
         const left = face.x - face.width * 0.25;
