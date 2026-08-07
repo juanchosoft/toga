@@ -342,6 +342,27 @@ export default function Home() {
     window.close();
   }, []);
 
+  const publishPhoto = async (
+    photoData: string,
+    fileName: string,
+    callback: string,
+    sessionId: string,
+  ) => {
+    const photoResponse = await fetch(photoData);
+    const photoBlob = await photoResponse.blob();
+    const form = new FormData();
+    form.append("file", photoBlob, fileName);
+    form.append("callback", callback);
+    form.append("sessionId", sessionId);
+
+    const response = await fetch("/api/upload-photo", {
+      method: "POST",
+      body: form,
+    });
+    if (!response.ok) throw new Error("No se pudo publicar la fotografía");
+    return await response.json() as { url: string; downloadUrl: string };
+  };
+
   const sendPhoto = async (photoData = photo) => {
     const params = new URLSearchParams(window.location.search);
     const callback = params.get("callback");
@@ -354,12 +375,27 @@ export default function Home() {
     }
 
     setStage("sending");
-    setMessage("Enviando tu fotografía…");
+    setMessage("Preparando tu fotografía para el chat…");
     try {
+      let hostedPhoto: { url?: string; downloadUrl?: string } = {};
+      try {
+        hostedPhoto = await publishPhoto(photoData, fileName, callback, sessionId);
+      } catch {
+        // The original Base64 image still reaches n8n if storage is unavailable.
+      }
+
+      setMessage("Enviando tu fotografía…");
       const response = await fetch(callback, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "success", sessionId, fileName, imageBase64: photoData }),
+        body: JSON.stringify({
+          status: "success",
+          sessionId,
+          fileName,
+          imageBase64: photoData,
+          imageUrl: hostedPhoto.url ?? "",
+          downloadUrl: hostedPhoto.downloadUrl ?? "",
+        }),
       });
       if (!response.ok) throw new Error("No se pudo entregar la imagen");
       streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -392,7 +428,7 @@ export default function Home() {
             <p>Activa la cámara, mira al frente y el filtro se ajustará automáticamente. Después de la cuenta regresiva, la foto se descargará y se enviará sin pasos adicionales.</p>
             <div className="privacy-note">
               <span>✓</span>
-              <p>La cámara solo se activa con tu permiso. Al pulsar el obturador, recibirás tu foto y también se enviará automáticamente al flujo de n8n.</p>
+              <p>La cámara solo se activa con tu permiso. Al pulsar el obturador, recibirás tu foto y se creará un enlace único para mostrarla en el chat.</p>
             </div>
             <button className="primary" onClick={startCamera}>Abrir cámara</button>
           </div>
